@@ -3,6 +3,7 @@ require('dotenv').config()
 const express = require('express');
 const sql = require('mssql');
 const server = express();
+server.set('view engine','ejs');
 const PORT = process.env.PORT || 3030;
 const config = {
 	server: process.env.SERVER,
@@ -50,7 +51,9 @@ server.get('/',(req,res)=>{
                 // console.log(err);
                 res.send(err)
             }else{
-                res.status(200).send(data.recordset);
+                console.log(data.recordset);
+                res.render('./index',{data: data.recordset[0]})
+                // res.status(200).send(data.recordset);
             }
             conn.close();
         })
