@@ -28,7 +28,8 @@ server.get('/add',(req,res)=>{
         }
         requis.query(`insert into [sample].[dbo].[users] values ('ahmad','123')`,(err,data)=>{
             if(err){
-                console.log(err);
+                // console.log(err);
+                res.send(err);
             }else{
                 res.status(200).send('Done');
             }
@@ -46,7 +47,8 @@ server.get('/',(req,res)=>{
         }
         requis.query(`select * from [sample].[dbo].[users] `,(err,data)=>{
             if(err){
-                console.log(err);
+                // console.log(err);
+                res.send(err)
             }else{
                 res.status(200).send(data.recordset);
             }
