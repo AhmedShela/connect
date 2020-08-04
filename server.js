@@ -1,86 +1,66 @@
-const {Connection, Request} = require("tedious");
+'use strict';
 require('dotenv').config()
 const express = require('express');
+const sql = require('mssql');
 const server = express();
+server.set('view engine','ejs');
 const PORT = process.env.PORT || 3030;
-// Create connection to database
 const config = {
-    authentication: {
-        options: {
-            userName: "KHAL", // update me
-            password: "Theshadow1993!@#" // update me
-        },
-        type: "default"
-    },
-    server: "khal-server.database.windows.net", // update me
-    options: {
-        database: "HR_Data", // update me
-        encrypt: true
-    }
-};
-
-const connection = new Connection(config);
-
-// Attempt to connect and execute queries if connection goes through
-connection.on("connect", err => {
-    if (err) {
-        console.error(err.message);
-    } else {
-        // queryDatabase();
-    }
+	server: process.env.SERVER,
+	authentication: {
+		type: 'default',
+		options: {
+			userName: process.env.USER_NAME,
+			password: process.env.PASS,
+		},
+	},
+	options: {
+		database: 'sample',
+		encrypt: false,
+	}
+}
+server.get('/add',(req,res)=>{
+    var conn = new sql.ConnectionPool(config);
+    var requis = new sql.Request(conn);
+    conn.connect(error=>{
+        if (error){
+            console.log(error);
+            return;
+        }
+        requis.query(`insert into [sample].[dbo].[users] values ('ahmad','123')`,(err,data)=>{
+            if(err){
+                // console.log(err);
+                res.send(err);
+            }else{
+                res.status(200).send('Done');
+            }
+            conn.close();
+        })
+    })
 });
 server.get('/',(req,res)=>{
-    console.log("Reading rows from the Table...");
-
-    // Read all rows from table
-    const request = new Request(
-      `select * from [HR_Data].[dbo].[Emp_general]`,
-      (err, rowCount) => {
-        if (err) {
-          console.error(err.message);
-        } else {
-
-          console.log(`${rowCount} row(s) returned`);
+        var conn = new sql.ConnectionPool(config);
+    var requis = new sql.Request(conn);
+    conn.connect(error=>{
+        if (error){
+            console.log(error);
+            return;
         }
-      }
-    );
+        requis.query(`select * from [sample].[dbo].[users] `,(err,data)=>{
+            if(err){
+                // console.log(err);
+                res.send(err)
+            }else{
+                console.log(data.recordset);
+                res.render('./index',{data: data.recordset[0]})
+                // res.status(200).send(data.recordset);
+            }
+            conn.close();
+        })
+    })
+    // res.send('hi');
+})
 
-    request.on("requestCompleted", columns => {
-        // let arr = columns.map(column =>{
-        //     return column.value
-        // })
-        res.send(columns)
-        // columns.forEach(column => {
-        //   console.log("%s\t%s", column.metadata.colName, column.value);
-        // });
-      });
-
-    connection.execSql(request);
-});
-
-// function queryDatabase(req,res) {
-//     console.log("Reading rows from the Table...");
-
-//     // Read all rows from table
-//     const request = new Request(`select * from [HR_Data].[dbo].[Emp_general]`, (err, rowCount) => {
-//         if (err) {
-//             console.error(err.message);
-//         } else {
-
-//             console.log(`${rowCount} row(s) returned`);
-//         }
-//     });
-
-//     request.on("row", columns => {
-//         let data = columns.map(column => {
-//             return column.metadata.colName,
-//             column.value;
-//         });
-//         res.send(data)
-//     });
-
-//     connection.execSql(request);
-// }
-server.listen(PORT, () => {
+server.listen(PORT,()=>{
     console.log(`listen to port ${PORT}`);
 })
