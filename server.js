@@ -29,7 +29,6 @@ server.get('/add',(req,res)=>{
         }
         requis.query(`insert into [sample].[dbo].[users] values ('ahmad','123')`,(err,data)=>{
             if(err){
-                // console.log(err);
                 res.send(err);
             }else{
                 res.status(200).send('Done');
@@ -48,17 +47,14 @@ server.get('/',(req,res)=>{
         }
         requis.query(`select * from [sample].[dbo].[users] `,(err,data)=>{
             if(err){
-                // console.log(err);
                 res.send(err)
             }else{
                 console.log(data.recordset);
                 res.render('./index',{data: data.recordset[0]})
-                // res.status(200).send(data.recordset);
             }
             conn.close();
         })
     })
-    // res.send('hi');
 })
 
 server.listen(PORT,()=>{
